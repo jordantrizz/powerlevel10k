@@ -9142,6 +9142,35 @@ prompt_powerlevel9k_teardown() {
   fi
 }
 
+function _p9k_get_version() {
+  local version
+  if [[ -d ${__p9k_root_dir}/.git ]]; then
+    version="$(command git -C ${__p9k_root_dir} describe --tags --always --dirty 2>/dev/null)" || version="unknown"
+  else
+    version="unknown"
+  fi
+  print -r -- "$version"
+}
+
+function _p9k_print_usage() {
+  local version="$(_p9k_get_version)"
+  print -rP -- "Usage: %2Fp10k%f %Bcommand%b [options]
+
+Powerlevel10k version: ${version}
+
+Commands:
+
+  %Bconfigure%b  run interactive configuration wizard
+  %Breload%b     reload configuration
+  %Bsegment%b    print a user-defined prompt segment
+  %Bdisplay%b    show, hide or toggle prompt parts
+  %Bhelp%b       print this help message
+
+Print help for a specific command:
+
+  %2Fp10k%f %Bhelp%b command"
+}
+
 typeset -gr __p9k_p10k_usage="Usage: %2Fp10k%f %Bcommand%b [options]
 
 Commands:
@@ -9307,7 +9336,7 @@ function p10k() {
   eval "$__p9k_intro_no_reply"
 
   if (( !ARGC )); then
-    print -rP -- $__p9k_p10k_usage >&2
+    _p9k_print_usage >&2
     return 1
   fi
 
@@ -9451,10 +9480,10 @@ function p10k() {
         print -rP -- ${(P)var}
         return 0
       elif (( ARGC == 1 )); then
-        print -rP -- $__p9k_p10k_usage
+        _p9k_print_usage
         return 0
       else
-        print -rP -- $__p9k_p10k_usage >&2
+        _p9k_print_usage >&2
         return 1
       fi
       ;;
@@ -9470,7 +9499,7 @@ function p10k() {
       return 0
       ;;
     *)
-      print -rP -- $__p9k_p10k_usage >&2
+      _p9k_print_usage >&2
       return 1
       ;;
   esac
